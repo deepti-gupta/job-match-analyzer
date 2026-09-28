@@ -1,0 +1,585 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RAG + LLM — Technical Flow</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: #1f2328; background: #fff; }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+
+  /* ── Header ── */
+  .hero { text-align: center; margin-bottom: 44px; }
+  .hero h1 { font-size: 22px; font-weight: 700; color: #1f2328; margin-bottom: 6px; }
+  .hero p { color: #57606a; font-size: 13px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: #f0f0ff; color: #6e40c9; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-top: 10px; }
+
+  /* ── Section headings ── */
+  h2 { font-size: 15px; font-weight: 700; color: #1f2328; margin: 36px 0 12px; padding-left: 10px; border-left: 3px solid #3b82d4; }
+  h3 { font-size: 13px; font-weight: 700; color: #1f2328; margin: 20px 0 8px; }
+
+  /* ── Pipeline flow ── */
+  .pipeline { display: flex; flex-direction: column; gap: 0; margin: 16px 0 28px; }
+  .phase { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+  .phase + .phase { margin-top: 8px; }
+  .phase-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .phase-body { padding: 14px 16px; border-top: 1px solid #e5e7eb; background: #fafafa; font-size: 13px; }
+
+  .phase-1 .phase-header { background: #eff6ff; color: #1d4ed8; }
+  .phase-2 .phase-header { background: #f0fdf4; color: #166534; }
+  .phase-3 .phase-header { background: #fdf4ff; color: #7e22ce; }
+
+  .arrow { text-align: center; color: #d1d5db; font-size: 18px; margin: 2px 0; }
+
+  /* ── Step row ── */
+  .steps { list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 6px; }
+  .steps li { counter-increment: step; display: flex; align-items: flex-start; gap: 10px; }
+  .steps li::before { content: counter(step); min-width: 20px; height: 20px; border-radius: 50%; background: #3b82d4; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0; }
+
+  /* ── Code inline ── */
+  code { background: #f6f8fa; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1px 5px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; color: #d63384; }
+
+  /* ── Concept cards ── */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; background: #fafafa; }
+  .card-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1f2328; }
+  .card-body { font-size: 12px; color: #57606a; line-height: 1.55; }
+
+  /* ── File map ── */
+  .file-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12px; }
+  .file-table th { background: #f6f8fa; text-align: left; padding: 7px 10px; font-weight: 600; border: 1px solid #e5e7eb; }
+  .file-table td { padding: 7px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  .file-table tr:nth-child(even) td { background: #fafafa; }
+  .filepath { font-family: monospace; font-size: 11px; color: #6e40c9; font-weight: 600; }
+  .phase-tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .p1 { background: #eff6ff; color: #1d4ed8; }
+  .p2 { background: #f0fdf4; color: #166534; }
+  .p3 { background: #fdf4ff; color: #7e22ce; }
+  .ui { background: #fff7ed; color: #9a3412; }
+  .infra { background: #f6f8fa; color: #57606a; }
+
+  /* ── Concept explainer ── */
+  .explainer { border-left: 3px solid #f0c000; background: #fffdf0; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 12px 0; font-size: 13px; color: #1f2328; }
+  .explainer strong { color: #856404; }
+
+  /* ── Math box ── */
+  .mathbox { background: #0d1117; color: #e6edf3; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 12px; line-height: 1.8; margin: 12px 0; }
+  .mathbox .comment { color: #8b949e; }
+  .mathbox .highlight { color: #79c0ff; }
+  .mathbox .green { color: #7ee787; }
+  .mathbox .yellow { color: #e3b341; }
+
+  /* ── Stack table ── */
+  .stack-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12px; }
+  .stack-table th { background: #f6f8fa; padding: 7px 12px; text-align: left; border: 1px solid #e5e7eb; font-weight: 600; }
+  .stack-table td { padding: 7px 12px; border: 1px solid #e5e7eb; }
+  .stack-table tr:nth-child(even) td { background: #fafafa; }
+
+  /* ── Quiz ── */
+  .quiz { background: #f6f8fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; margin: 14px 0; }
+  .quiz h3 { font-size: 13px; margin-bottom: 12px; color: #1f2328; }
+  .q { margin-bottom: 14px; }
+  .q-text { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #1f2328; }
+  .q-ans { font-size: 12px; color: #57606a; padding-left: 12px; border-left: 2px solid #d1d5db; }
+
+  /* ── Gotchas ── */
+  .gotchas { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+  .gotcha { display: flex; gap: 10px; background: #fff0f0; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 12px; }
+  .gotcha .icon { font-size: 15px; flex-shrink: 0; }
+  .gotcha .fix { color: #166534; font-weight: 600; }
+
+  /* ── Footer ── */
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #8c959f; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="hero">
+    <h1>RAG + LLM — Technical Flow</h1>
+    <p>Complete learning guide for the Job Match Analyzer you built</p>
+    <div class="badge">⚡ Next.js · @xenova/transformers · Groq · qwen3.8-27b</div>
+  </div>
+
+  
+  <h2>🗺️ Learning Roadmap — Zero to AI/RAG Practitioner</h2>
+  <div class="explainer">
+    You already have 10 years of React/TypeScript experience. <strong>You are not starting from zero on engineering</strong> — you're only learning the AI layer. This roadmap is scoped to exactly what a senior frontend engineer needs to add to be a credible AI engineer, ordered by dependency.
+  </div>
+
+  <div style="background:#0d1117;border-radius:12px;padding:20px;margin:14px 0;font-family:monospace;font-size:11px;line-height:2;">
+    <div style="color:#8b949e;margin-bottom:8px;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;">knowledge dependency tree</div>
+    <span style="color:#79c0ff;">Tokens &amp; how LLMs work</span><br>
+    <span style="color:#30363d;">&nbsp;&nbsp;&nbsp;↓</span><br>
+    <span style="color:#79c0ff;">Prompt engineering</span> <span style="color:#8b949e;">(how to talk to the model)</span><br>
+    <span style="color:#30363d;">&nbsp;&nbsp;&nbsp;↓</span><br>
+    <span style="color:#79c0ff;">Embeddings</span> <span style="color:#8b949e;">(how text becomes math)</span><br>
+    <span style="color:#30363d;">&nbsp;&nbsp;&nbsp;↓</span><br>
+    <span style="color:#79c0ff;">Vector stores &amp; similarity search</span><br>
+    <span style="color:#30363d;">&nbsp;&nbsp;&nbsp;↓</span><br>
+    <span style="color:#79c0ff;">RAG architecture</span> <span style="color:#8b949e;">(combining all of the above)</span><br>
+    <span style="color:#30363d;">&nbsp;&nbsp;&nbsp;↓</span><br>
+    <span style="color:#79c0ff;">Agents &amp; tool calling</span><br>
+    <span style="color:#30363d;">&nbsp;&nbsp;&nbsp;↓</span><br>
+    <span style="color:#e3b341;">Production concerns</span> <span style="color:#8b949e;">(evaluation, cost, latency, safety)</span><br><br>
+    <span style="color:#7ee787;font-weight:bold;">★ You are here</span> <span style="color:#8b949e;">— completed RAG architecture from scratch ✓</span>
+  </div>
+
+  <!-- Stage 1 -->
+  <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+    <div style="background:#eff6ff;color:#1d4ed8;padding:11px 16px;font-weight:700;font-size:12px;">Stage 1 &nbsp;<span style="font-weight:400;opacity:0.8">Week 1–2 · Foundation — how LLMs actually work</span></div>
+    <div style="padding:14px 16px;background:#fafafa;font-size:13px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Tokens</div><div style="font-size:11px;color:#57606a;">LLMs read tokens (~4 chars). "TypeScript" = 2 tokens. Explains context limits and pricing.</div><div style="font-size:10px;color:#3b82d4;margin-top:4px;">▶ tiktokenizer.vercel.app — see tokens live</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Context window</div><div style="font-size:11px;color:#57606a;">Max tokens the model can see. Exceeding it = oldest content silently dropped. Why chunking exists.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Temperature &amp; sampling</div><div style="font-size:11px;color:#57606a;">Temperature 0 = deterministic (JSON output). Temperature 1 = creative (cover letters). You use 0.3.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">System vs User roles</div><div style="font-size:11px;color:#57606a;">System = persistent instructions. User = per-request input. You used this in the Groq call.</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #d1d5db;border-left:3px solid #3b82d4;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;"><strong>Mini-project:</strong> Call Groq API directly — send a system prompt "you are a JSON generator" and observe how temperature affects output consistency.</div>
+    </div>
+  </div>
+
+  <!-- Stage 2 -->
+  <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+    <div style="background:#fdf4ff;color:#7e22ce;padding:11px 16px;font-weight:700;font-size:12px;">Stage 2 &nbsp;<span style="font-weight:400;opacity:0.8">Week 2–3 · Prompt Engineering — the most underrated skill</span></div>
+    <div style="padding:14px 16px;background:#fafafa;font-size:13px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Zero-shot prompting</div><div style="font-size:11px;color:#57606a;">Ask LLM with no examples. You used this in analyzer.ts — just instructions + JSON schema.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Few-shot prompting</div><div style="font-size:11px;color:#57606a;">Provide 2–3 input/output examples before your real question. Dramatically improves output quality.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Chain-of-thought (CoT)</div><div style="font-size:11px;color:#57606a;">Add "Think step by step." Forces reasoning before answering. Improves accuracy by ~30%.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Persona + constraints</div><div style="font-size:11px;color:#57606a;">"You are an ATS specialist" activates domain knowledge. Explicit rules prevent hallucination.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Structured output</div><div style="font-size:11px;color:#57606a;">JSON mode + schema in prompt = reliable parsing. Fallback regex handles edge cases. You use this.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Prompt injection defence</div><div style="font-size:11px;color:#57606a;">Wrap user input: &lt;jd&gt;{input}&lt;/jd&gt; to separate from your instructions. Security concern for production.</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #d1d5db;border-left:3px solid #3b82d4;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;"><strong>Mini-project:</strong> Add 1 few-shot example of a good cover letter to the prompt. Compare output quality before and after.</div>
+    </div>
+  </div>
+
+  <!-- Stage 3 -->
+  <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+    <div style="background:#f0fdf4;color:#166534;padding:11px 16px;font-weight:700;font-size:12px;">Stage 3 &nbsp;<span style="font-weight:400;opacity:0.8">Week 3–4 · Embeddings &amp; Vector Search — you built this ✓</span></div>
+    <div style="padding:14px 16px;background:#fafafa;font-size:13px;">
+      <p style="font-size:12px;color:#166534;font-weight:600;margin-bottom:8px;">Already completed in this project:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">✓ Text embeddings</div><div style="font-size:11px;color:#57606a;">all-MiniLM-L6-v2 → 384-dim float vector. Meaning as direction in space.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">✓ Cosine similarity</div><div style="font-size:11px;color:#57606a;">Implemented from scratch. dot(A,B)/(|A|×|B|). Range 0–1.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">✓ In-memory vector store</div><div style="font-size:11px;color:#57606a;">Module-level array. upsert, query, clearStore.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">✓ Chunking strategies</div><div style="font-size:11px;color:#57606a;">JSON-aware + paragraph-split. inferSection() heuristic.</div></div>
+      </div>
+      <p style="font-size:12px;font-weight:600;margin-bottom:8px;color:#1f2328;">Learn next:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Persistent vector stores</div><div style="font-size:11px;color:#57606a;">Upstash Redis Vector, Pinecone, pgvector. Vectors survive server restarts.</div><div style="font-size:10px;color:#3b82d4;margin-top:4px;">▶ Try Upstash free tier</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Hybrid search</div><div style="font-size:11px;color:#57606a;">Combine semantic (vector) + keyword (BM25). Fixes cases where exact terms score low semantically.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 4 -->
+  <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+    <div style="background:#fff7ed;color:#9a3412;padding:11px 16px;font-weight:700;font-size:12px;">Stage 4 &nbsp;<span style="font-weight:400;opacity:0.8">Week 4–6 · Advanced RAG patterns</span></div>
+    <div style="padding:14px 16px;background:#fafafa;font-size:13px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Query rewriting</div><div style="font-size:11px;color:#57606a;">Ask LLM to rewrite the user's query for better retrieval before searching. "React job" → "Senior React TypeScript frontend engineer."</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Re-ranking</div><div style="font-size:11px;color:#57606a;">Retrieve top-20 → re-rank with cross-encoder → keep top-4. Two-stage. Slower but much more accurate.</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">RAG evaluation (RAGAS)</div><div style="font-size:11px;color:#57606a;">Measures Faithfulness, Answer Relevance, Context Precision. Know if RAG is actually working.</div><div style="font-size:10px;color:#3b82d4;margin-top:4px;">▶ docs.ragas.io</div></div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Guardrails</div><div style="font-size:11px;color:#57606a;">Validate LLM output before returning. Schema validation (Zod), hallucination detection. You do basic validation with matchScore check.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 5 -->
+  <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:8px;">
+    <div style="background:#0d1117;color:#e6edf3;padding:11px 16px;font-weight:700;font-size:12px;">Stage 5 &nbsp;<span style="font-weight:400;opacity:0.8">Week 6–8 · Agents &amp; Tool Calling</span></div>
+    <div style="padding:14px 16px;background:#161b22;font-size:13px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;color:#e6edf3;">Tool calling</div><div style="font-size:11px;color:#8b949e;">You define functions, LLM decides when/how to call them. Foundation of all AI agents.</div><div style="font-size:10px;color:#3b82d4;margin-top:4px;">▶ Groq / OpenAI tool_calls API</div></div>
+        <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;color:#e6edf3;">ReAct pattern</div><div style="font-size:11px;color:#8b949e;">Reason + Act loop: LLM reasons → calls tool → observes result → reasons again → next tool → done.</div></div>
+        <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;color:#e6edf3;">Streaming</div><div style="font-size:11px;color:#8b949e;">Token-by-token via ReadableStream. Transforms 8s wait into live typing. Vercel AI SDK useChat.</div></div>
+        <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;color:#e6edf3;">Multi-agent systems</div><div style="font-size:11px;color:#8b949e;">Specialized LLMs coordinated by an orchestrator. LangGraph, CrewAI.</div></div>
+      </div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-left:3px solid #7ee787;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;"><strong style="color:#7ee787;">Next evolution of this app:</strong> <span style="color:#8b949e;">Tool 1: search Naukri for jobs · Tool 2: score each against resume (your existing RAG) · Tool 3: draft applications. This is the naukri-agent already in your repo.</span></div>
+    </div>
+  </div>
+
+  <!-- KEY TERMS GLOSSARY -->
+  <h2>📖 Key Terms — Plain English</h2>
+  <table class="stack-table">
+    <thead><tr><th>Term</th><th>Plain English</th><th>Where you used it</th></tr></thead>
+    <tbody>
+      <tr><td><strong>LLM</strong></td><td>A neural network trained on text that predicts the next token.</td><td>Groq qwen3.8-27b in analyzer.ts</td></tr>
+      <tr><td><strong>Token</strong></td><td>Smallest unit an LLM reads — roughly 4 characters.</td><td>Context window, prompt cost</td></tr>
+      <tr><td><strong>Embedding</strong></td><td>Float vector encoding the meaning of text. Similar meaning = similar vector.</td><td>all-MiniLM-L6-v2 in groqClient.ts</td></tr>
+      <tr><td><strong>Vector store</strong></td><td>Database optimised for nearest-vector search.</td><td>vectorStore.ts (in-memory)</td></tr>
+      <tr><td><strong>RAG</strong></td><td>Inject retrieved facts into prompt so LLM answers from your data, not hallucination.</td><td>The entire project</td></tr>
+      <tr><td><strong>Chunk</strong></td><td>A piece of a document. Resume = 6 chunks: summary, 2 skills, 3 jobs.</td><td>ingest.ts buildChunksFromJson()</td></tr>
+      <tr><td><strong>Cosine similarity</strong></td><td>Score 0–1. How similar two vectors are. 1 = identical meaning.</td><td>vectorStore.ts</td></tr>
+      <tr><td><strong>Temperature</strong></td><td>0 = deterministic. 1 = creative. You use 0.3 for scoring.</td><td>analyzeMatch() analyzer.ts</td></tr>
+      <tr><td><strong>JSON mode</strong></td><td>Forces LLM to output only valid JSON.</td><td>response_format in analyzer.ts</td></tr>
+      <tr><td><strong>ATS</strong></td><td>Applicant Tracking System — scans resumes for keyword matches.</td><td>KeywordSuggestions feature</td></tr>
+      <tr><td><strong>Tool calling</strong></td><td>You define functions, LLM decides when to call them. Foundation of agents.</td><td>Stage 5 — next to learn</td></tr>
+      <tr><td><strong>Hallucination</strong></td><td>LLM confidently stating false information. RAG reduces this.</td><td>Why you inject resume context</td></tr>
+      <tr><td><strong>ONNX</strong></td><td>Format for running ML models without original framework. Used by @xenova/transformers.</td><td>groqClient.ts</td></tr>
+      <tr><td><strong>Fine-tuning</strong></td><td>Baking knowledge into model weights. Expensive, slow. RAG is usually better for dynamic data.</td><td>Alternative to RAG</td></tr>
+    </tbody>
+  </table>
+
+  <!-- INTERVIEW QUESTIONS -->
+  <h2>💼 Interview Questions You Can Now Answer</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
+    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:12px;"><div style="font-weight:700;color:#1f2328;margin-bottom:5px;">"Explain RAG in one sentence."</div><div style="color:#57606a;">Retrieve the most relevant facts from your own data and inject them into the LLM prompt so it generates grounded answers instead of hallucinating.</div></div>
+    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:12px;"><div style="font-weight:700;color:#1f2328;margin-bottom:5px;">"Why not send the whole document to the LLM?"</div><div style="color:#57606a;">Context windows have limits, every token costs money, and irrelevant content degrades output quality. Chunking + retrieval sends only the most relevant 10%.</div></div>
+    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:12px;"><div style="font-weight:700;color:#1f2328;margin-bottom:5px;">"What embedding model and why?"</div><div style="color:#57606a;">all-MiniLM-L6-v2 via @xenova/transformers — runs ONNX in Node, no API key, 23MB, 384-dim. Fast for real-time use, accurate for semantic matching.</div></div>
+    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:12px;"><div style="font-weight:700;color:#1f2328;margin-bottom:5px;">"Fine-tuning vs RAG — when to use which?"</div><div style="color:#57606a;">Fine-tuning bakes knowledge into weights — expensive, slow to update. RAG retrieves at runtime — instant updates, no training. RAG for dynamic/private data.</div></div>
+    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:12px;"><div style="font-weight:700;color:#1f2328;margin-bottom:5px;">"How do you measure if RAG is working?"</div><div style="color:#57606a;">Inspect similarity scores in the RAG debug panel. Use RAGAS framework for automated evaluation: faithfulness, answer relevance, context precision.</div></div>
+    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:12px;"><div style="font-weight:700;color:#1f2328;margin-bottom:5px;">"How would you scale this to production?"</div><div style="color:#57606a;">Replace in-memory store with Upstash Redis Vector. Add streaming. Add user auth with vector namespaces. Evaluate with RAGAS on model updates.</div></div>
+  </div>
+
+  <div style="border-top:2px solid #e5e7eb;margin:40px 0 36px;"></div>
+  <p style="text-align:center;font-size:12px;color:#57606a;margin-bottom:36px;">Below: technical reference for the project code</p>
+
+  <h2>What is RAG?</h2>
+  <div class="explainer">
+    <strong>RAG = Retrieval-Augmented Generation.</strong> Instead of asking an LLM a question from its training data alone, you first <em>retrieve</em> relevant facts from your own knowledge base and <em>inject</em> them into the prompt. The LLM then generates an answer that is grounded in your data — not hallucinated from general knowledge.
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">❌ Without RAG</div>
+      <div class="card-body">Ask LLM: "Does this candidate match the JD?" → LLM has no idea who the candidate is → generic or hallucinated answer.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ With RAG</div>
+      <div class="card-body">Retrieve the candidate's real skills &amp; experience → inject into prompt → LLM generates a grounded, accurate match score.</div>
+    </div>
+  </div>
+
+  
+  <h2>The 3-Phase Pipeline</h2>
+
+  <div class="pipeline">
+    
+    <div class="phase phase-1">
+      <div class="phase-header">📥 Phase 1 — Ingest (one-time)</div>
+      <div class="phase-body">
+        <ul class="steps">
+          <li>Load resume — JSON profile or uploaded PDF/text</li>
+          <li>Split into semantic <strong>chunks</strong> (summary, skills, each job = 1 chunk)</li>
+          <li>Call <code>embed(chunk)</code> → <strong>@xenova/transformers</strong> runs <code>all-MiniLM-L6-v2</code> locally → returns a <strong>384-dimensional float vector</strong></li>
+          <li>Store <code>{ id, text, embedding[], metadata }</code> in the in-memory <strong>vector store</strong></li>
+        </ul>
+        <p style="margin-top:10px;font-size:12px;color:#57606a">File: <code>src/lib/ingest.ts</code> · Runs when first analyze call arrives (lazy) or on upload</p>
+      </div>
+    </div>
+
+    <div class="arrow">↓</div>
+
+    
+    <div class="phase phase-2">
+      <div class="phase-header">🔍 Phase 2 — Retrieve (per request)</div>
+      <div class="phase-body">
+        <ul class="steps">
+          <li>User pastes a job description (JD)</li>
+          <li>Call <code>embed(JD)</code> → same model produces a 384-dim vector for the JD</li>
+          <li>Compute <strong>cosine similarity</strong> between JD vector and every stored resume chunk vector</li>
+          <li>Return the <strong>top-4 most similar chunks</strong> — visible in the RAG Debug Panel</li>
+        </ul>
+        <p style="margin-top:10px;font-size:12px;color:#57606a">Files: <code>src/lib/retriever.ts</code> · <code>src/lib/vectorStore.ts</code></p>
+      </div>
+    </div>
+
+    <div class="arrow">↓</div>
+
+    
+    <div class="phase phase-3">
+      <div class="phase-header">🤖 Phase 3 — Generate (per request)</div>
+      <div class="phase-body">
+        <ul class="steps">
+          <li>Build an <strong>augmented prompt</strong> = retrieved chunks + full JD + instructions</li>
+          <li>Call <strong>Groq API</strong> with model <code>qwen/qwen3.8-27b</code> in JSON mode</li>
+          <li>LLM returns structured JSON: matchScore, matchSummary, matchedSkills, missingSkills, strengthPoints, coverLetter, <strong>keywordSuggestions</strong></li>
+          <li>Parse &amp; validate the JSON → send to frontend</li>
+        </ul>
+        <p style="margin-top:10px;font-size:12px;color:#57606a">File: <code>src/lib/analyzer.ts</code></p>
+      </div>
+    </div>
+  </div>
+
+  
+  <h2>What is an Embedding?</h2>
+  <div class="explainer">
+    An <strong>embedding</strong> is a list of numbers (a vector) that captures the <em>meaning</em> of text. Similar meaning → similar numbers → high cosine similarity. This is how "React expert" and "strong React skills required" score high together even though the exact words differ.
+  </div>
+  <div class="mathbox">
+    <span class="comment">// "React TypeScript expert" → embed() →</span><br />
+    <span class="highlight">[ -0.075, -0.031, 0.044, 0.112, -0.089, ... ]</span>  <span class="comment">← 384 numbers</span><br /><br />
+    <span class="comment">// "frontend developer React TypeScript 5 years" → embed() →</span><br />
+    <span class="highlight">[ -0.068, -0.028, 0.051, 0.108, -0.091, ... ]</span>  <span class="comment">← 384 numbers</span><br /><br />
+    <span class="comment">// Cosine similarity between them:</span><br />
+    <span class="green">similarity = 0.8269</span>  <span class="comment">← very high → correctly identified as related!</span><br /><br />
+    <span class="comment">// "Python data science machine learning" → embed() →</span><br />
+    <span class="highlight">[ 0.031, 0.091, -0.103, -0.044, 0.172, ... ]</span><br />
+    <span class="yellow">similarity = 0.21</span>   <span class="comment">← low → correctly identified as unrelated to React</span>
+  </div>
+
+  
+  <h2>Cosine Similarity — The Math</h2>
+  <div class="mathbox">
+    <span class="comment">// Formula:  similarity(A, B) = (A · B) / (|A| × |B|)</span><br /><br />
+    <span class="comment">// Dot product: multiply each pair of numbers, sum them up</span><br />
+    <span class="green">dotProduct(A, B)</span> = A[0]×B[0] + A[1]×B[1] + ... + A[383]×B[383]<br /><br />
+    <span class="comment">// Magnitude: "length" of the vector</span><br />
+    <span class="yellow">magnitude(A)</span> = √(A[0]² + A[1]² + ... + A[383]²)<br /><br />
+    <span class="comment">// Result: 0 = completely unrelated, 1 = identical meaning</span><br />
+    <span class="highlight">cosineSimilarity</span> = dotProduct / (magnitude(A) × magnitude(B))
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:4px">This is exactly what <code>vectorStore.ts</code> computes — no library, just arithmetic.</p>
+
+  
+  <h2>Every File Explained</h2>
+  <table class="file-table">
+    <thead>
+      <tr><th>File</th><th>RAG Phase</th><th>What it does</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="filepath">src/lib/vectorStore.ts</td>
+        <td><span class="phase-tag p1">Phase 1</span> <span class="phase-tag p2">Phase 2</span></td>
+        <td>In-memory array of <code>{ id, text, embedding[], metadata }</code>. Functions: <code>upsert</code>, <code>query</code> (cosine similarity), <code>clearStore</code>.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/lib/groqClient.ts</td>
+        <td><span class="phase-tag p1">Phase 1</span> <span class="phase-tag p2">Phase 2</span> <span class="phase-tag p3">Phase 3</span></td>
+        <td>Two singletons: <code>embed(text)</code> via @xenova/transformers (no key) · <code>getGroqClient()</code> for LLM chat (needs GROQ_API_KEY).</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/lib/ingest.ts</td>
+        <td><span class="phase-tag p1">Phase 1</span></td>
+        <td><code>ingestResume()</code> — chunks JSON profile. <code>ingestFromText(text)</code> — chunks any uploaded text by paragraph. Calls <code>embed()</code> on each chunk and stores in vector store.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/lib/retriever.ts</td>
+        <td><span class="phase-tag p2">Phase 2</span></td>
+        <td>Embeds the JD text, queries the vector store, returns top-4 most similar resume chunks with their similarity scores.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/lib/analyzer.ts</td>
+        <td><span class="phase-tag p3">Phase 3</span></td>
+        <td>Builds the RAG prompt, calls Groq <code>qwen3.8-27b</code> in JSON mode. Returns matchScore, gaps, coverLetter + <strong>keywordSuggestions[]</strong>.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/lib/api.ts</td>
+        <td><span class="phase-tag ui">UI</span></td>
+        <td>Frontend fetch functions: <code>analyzeJob()</code>, <code>uploadResume(file)</code>, <code>uploadResumeText(text)</code>. Exports <code>KeywordSuggestion</code> type.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/app/api/analyze/route.ts</td>
+        <td><span class="phase-tag p2">Phase 2</span> <span class="phase-tag p3">Phase 3</span></td>
+        <td>Next.js Route Handler. Auto-ingests if store empty → retrieves chunks → generates analysis → returns JSON.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/app/api/upload-resume/route.ts</td>
+        <td><span class="phase-tag p1">Phase 1</span></td>
+        <td>Accepts multipart PDF or plain text. Uses <code>extractPdfText()</code> with 3-layer XRef fallback. Calls <code>ingestFromText()</code>.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/app/api/ingest/route.ts</td>
+        <td><span class="phase-tag p1">Phase 1</span></td>
+        <td>Manually triggers default JSON resume ingest. Kept for debugging.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/components/ResumeUpload.tsx</td>
+        <td><span class="phase-tag ui">UI</span></td>
+        <td>Drag-and-drop file upload + paste-text tabs. Calls <code>/api/upload-resume</code>. Shows success/error state.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/components/MatchScore.tsx</td>
+        <td><span class="phase-tag ui">UI</span></td>
+        <td>SVG circular gauge. Green ≥70, yellow 50–69, red &lt;50.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/components/KeywordSuggestions.tsx</td>
+        <td><span class="phase-tag ui">UI</span></td>
+        <td>Renders ATS keywords grouped by priority (high/medium/low). Each keyword is individually copyable. "Copy all" exports the full list with reasons.</td>
+      </tr>
+      <tr>
+        <td class="filepath">src/components/RAGDebugPanel.tsx</td>
+        <td><span class="phase-tag ui">UI</span></td>
+        <td>Shows the top-4 retrieved chunks with section labels and similarity scores. Makes Phase 2 visible in real time.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>Tech Stack — Why Each Tool</h2>
+  <table class="stack-table">
+    <thead>
+      <tr><th>Tool</th><th>Used for</th><th>Why this choice</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>@xenova/transformers</code><br /><code>all-MiniLM-L6-v2</code></td>
+        <td>Embeddings (Phase 1 + 2)</td>
+        <td>Runs ONNX model in-process inside Node. No API key, no network call, works on Vercel. 384-dim vectors, 23MB model.</td>
+      </tr>
+      <tr>
+        <td><code>groq-sdk</code><br /><code>qwen/qwen3.8-27b</code></td>
+        <td>LLM generation (Phase 3)</td>
+        <td>Groq runs Qwen3 at ~500 tokens/sec. Free tier. Supports JSON mode — forces structured output.</td>
+      </tr>
+      <tr>
+        <td>Custom <code>vectorStore.ts</code></td>
+        <td>Vector storage + similarity search</td>
+        <td>In-process array with cosine similarity. Zero dependencies, works in Vercel serverless. Resets on cold starts (acceptable for demo).</td>
+      </tr>
+      <tr>
+        <td><code>pdf-parse@1.1.1</code></td>
+        <td>PDF text extraction</td>
+        <td>Pinned to v1 (stable). v2 changed API completely. 3-layer XRef fallback handles malformed PDFs from Word/Canva/online builders.</td>
+      </tr>
+      <tr>
+        <td>Next.js 14 App Router</td>
+        <td>Full-stack framework</td>
+        <td>API Route Handlers replace Express. Single repo, single deploy command to Vercel.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>Request Lifecycle — Step by Step</h2>
+  <ul class="steps" style="gap:8px">
+    <li>User pastes a JD → clicks <strong>Analyze Match</strong> → <code>POST /api/analyze</code> called with <code>{ jobDescription }</code></li>
+    <li><code>storeSize() === 0</code> → auto-calls <code>ingestResume()</code> → 6 chunks created, each embedded via ONNX → stored in <code>store[]</code></li>
+    <li><code>retrieveRelevantChunks(jd, 4)</code> → JD embedded → cosine similarity vs all chunks → top-4 returned with scores → shown in RAG Debug Panel</li>
+    <li><code>buildPrompt(chunks, jd)</code> → context block + full JD + JSON schema including <code>keywordSuggestions</code> field</li>
+    <li>Groq API call: <code>model: "qwen/qwen3.8-27b"</code>, <code>response_format: json_object</code>, <code>temperature: 0.3</code></li>
+    <li>JSON parsed → validated → returned: matchScore, skills, strengths, coverLetter, <strong>keywordSuggestions[]</strong></li>
+    <li>Frontend renders: score gauge → skill gaps → ATS keywords → cover letter → RAG debug panel</li>
+  </ul>
+
+  
+  <h2>Prompt Engineering — Why It's Structured This Way</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">JSON mode (<code>response_format</code>)</div>
+      <div class="card-body">Forces the LLM to output only valid JSON. Without this, models sometimes wrap JSON in markdown fences (```json ... ```) which breaks <code>JSON.parse()</code>. The fallback regex <code>/\{[\s\S]*\}/</code> handles edge cases.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">temperature: 0.3</div>
+      <div class="card-body">Lower temperature = more deterministic output. For scoring and skill matching you want consistency, not creativity. Cover letter generation still benefits from slight variation.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Context injection</div>
+      <div class="card-body">The retrieved chunks are labelled: <code>[Section 1 — skills]</code>, <code>[Section 2 — experience]</code>. This helps the LLM understand the structure of the information it's reading.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ATS specialist persona</div>
+      <div class="card-body">Prompt begins: "You are an expert career coach, recruiter, <strong>and ATS specialist</strong>." This activates the model's knowledge of how ATS systems score keywords — critical for the keyword suggestions feature.</div>
+    </div>
+  </div>
+
+  
+  <h2>Bugs Fixed &amp; Lessons Learned</h2>
+  <div class="gotchas">
+    <div class="gotcha">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>Next.js module isolation</strong> — Each API route has its own module scope. <code>/api/ingest</code> writing to <code>store[]</code> is invisible to <code>/api/analyze</code>.<br />
+        <span class="fix">Fix: auto-ingest inside /api/analyze when storeSize() === 0.</span>
+      </div>
+    </div>
+    <div class="gotcha">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>Groq removed embeddings</strong> — Groq dropped <code>/embeddings</code> endpoint in 2025. Code using <code>groq.embeddings.create()</code> returns 404.<br />
+        <span class="fix">Fix: switched to @xenova/transformers (local ONNX, no key needed).</span>
+      </div>
+    </div>
+    <div class="gotcha">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>Groq model deprecation</strong> — <code>llama-3.1-8b-instant</code> removed. <code>llama3-8b-8192</code>, <code>gemma2-9b-it</code>, <code>mixtral</code> all deprecated too.<br />
+        <span class="fix">Fix: switched to qwen/qwen3.8-27b (available, supports JSON mode).</span>
+      </div>
+    </div>
+    <div class="gotcha">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>pdf-parse@2.x breaking change</strong> — v2 changed from <code>module.exports = fn</code> to an ESM module, requires Node 20.16+, completely different API.<br />
+        <span class="fix">Fix: pinned to pdf-parse@1.1.1. Runtime guard: typeof pdfParse === "function" ? pdfParse : pdfParse.default.</span>
+      </div>
+    </div>
+    <div class="gotcha">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>onnxruntime-node webpack error</strong> — Next.js webpack tried to bundle native <code>.node</code> binary files, which is impossible.<br />
+        <span class="fix">Fix: added onnxruntime-node to serverComponentsExternalPackages and webpack externals in next.config.js.</span>
+      </div>
+    </div>
+    <div class="gotcha">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>"bad XRef entry" on PDF upload</strong> — pdfjs-dist throws this for PDFs with malformed cross-reference tables. Very common with Word exports, Canva resumes, and online resume builders.<br />
+        <span class="fix">Fix: 3-layer fallback in extractPdfText() — attempt 1: { max:0 } recovery mode · attempt 2: { version:"v1.10.100" } older parser · attempt 3: friendly error telling user to paste text.</span>
+      </div>
+    </div>
+  </div>
+
+  
+  <h2>Self-Test Questions</h2>
+  <div class="quiz">
+    <div class="q">
+      <div class="q-text">Q1. Why do we chunk the resume instead of sending the whole thing to the LLM?</div>
+      <div class="q-ans">LLMs have context limits and cost money per token. Chunking lets us retrieve only the most relevant parts (e.g., for a React JD, retrieve skills + React experience chunks) instead of sending everything. This is more accurate and cheaper.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q2. Why must the JD and resume chunks use the same embedding model?</div>
+      <div class="q-ans">Embeddings are only comparable within the same model's vector space. Mixing models is like measuring one distance in miles and another in kilometres — the cosine similarity numbers would be meaningless.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q3. What does cosine similarity measure, and what's its range?</div>
+      <div class="q-ans">It measures the angle between two vectors — how similar their direction is, independent of their length. Range: 0 (unrelated) to 1 (identical meaning). Two texts can have very different word counts but high similarity if they mean the same thing.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q4. What is "augmented" in Retrieval-Augmented Generation?</div>
+      <div class="q-ans">The prompt is augmented (enriched) with retrieved context before being sent to the LLM. Instead of just "analyze this JD", the prompt becomes "here are the candidate's actual skills and experience [retrieved chunks] — now analyze this JD". The LLM generates from facts, not from guessing.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q5. Why does the vector store reset on Vercel cold starts, and how is it handled?</div>
+      <div class="q-ans">Vercel serverless functions are stateless — memory is wiped when the container shuts down. The store is re-populated on the next /api/analyze call via auto-ingest (storeSize() === 0 check). For production, a persistent store like Upstash Redis would be used instead.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q6. What is the RAG Debug Panel showing, and why is it useful?</div>
+      <div class="q-ans">It shows the top-4 resume chunks retrieved for the current JD — their section label (skills/experience), similarity score, and a text preview. It makes Phase 2 (retrieval) transparent: you can see exactly which resume content was injected into the LLM prompt, and why a high or low match score was given.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Q7. Why does the keyword suggestion prompt say "only suggest keywords the candidate can authentically add"?</div>
+      <div class="q-ans">Without this rule, the LLM would list every keyword in the JD — including skills the candidate doesn't have. The rule keeps suggestions grounded in the actual resume content, so the candidate can back them up in an interview. This is the same RAG principle: context constrains generation.</div>
+    </div>
+  </div>
+
+  
+  <h2>Next Steps to Go Deeper</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">🔁 Streaming responses</div>
+      <div class="card-body">Use <code>groq.chat.completions.create({ stream: true })</code> + Next.js <code>ReadableStream</code> to show the cover letter being typed in real time.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">💾 Persistent vector store</div>
+      <div class="card-body">Replace in-memory array with Upstash Redis Vector. Vectors survive cold starts. Add a user ID so multiple people can have their own resume indexed.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Better chunking</div>
+      <div class="card-body">Use sliding-window chunking with overlap (e.g. 512 tokens, 50 overlap). Preserves context at chunk boundaries. Try <code>langchain</code>'s <code>RecursiveCharacterTextSplitter</code>.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Re-ranking</div>
+      <div class="card-body">After retrieval, use a cross-encoder model (not bi-encoder) to re-rank the top-K chunks. More accurate than cosine similarity alone for complex queries.</div>
+    </div>
+  </div>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

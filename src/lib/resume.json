@@ -1,0 +1,140 @@
+{
+  "_meta": {
+    "source": "Deepti_Resume.pdf",
+    "last_updated": "2025-07-14",
+    "note": "This file is the single source of truth. Never invent or assume data not present here."
+  },
+  "personal": {
+    "name": "Deepti Gupta",
+    "title": "Senior Software Engineer",
+    "location": "Bengaluru, India",
+    "phone": "+91 7846848772",
+    "email": "deeptigpt205@gmail.com",
+    "linkedin": "linkedin.com/in/deepti-gupta"
+  },
+  "summary": "Senior Software Engineer with 10+ years of hands-on experience designing, coding, and enhancing front-end components for data-intensive systems using React.js and TypeScript. Strong background in component-based architecture and state management (Redux, Redux-Saga, Context API), REST and GraphQL API integration, and OAuth2/OIDC authentication flows. Proven experience building dashboard-style enterprise applications — including a React/Redux Toolkit analytics platform that turned large-scale datamarts into actionable visualizations for business stakeholders — along with role-based UI behavior, form validation, and error/loading-state handling for production-grade products. Skilled in Agile delivery, UI test automation (Cypress), and CI/CD pipelines, with a track record leading engineering teams of 5–10, mentoring junior developers, and driving best practices to improve software quality and delivery.",
+  "total_experience_years": 10,
+  "_skill_levels": {
+    "_note": "expert = 3+ yrs production use; proficient = 1–3 yrs; familiar = used but not primary. Used by ranker to weight skill matches.",
+    "expert": [
+      "React JS (ES6+)", "JavaScript", "TypeScript", "Redux", "Context API",
+      "RESTful API", "Axios", "React Query (TanStack Query)", "Micro-Frontends",
+      "Module Federation", "Component-Driven Design", "Webpack", "ESLint",
+      "Jest", "Cypress", "Git", "CI/CD Pipelines", "OIDC", "OAuth",
+      "AWS Amplify", "AWS Cognito", "Tailwind", "Material UI", "Ant Design (Antd)",
+      "GraphQL", "Storybook", "Agile Development", "Code Review", "Mentorship"
+    ],
+    "proficient": [
+      "Redux-Thunk", "Redux-Saga", "Frontend System Design Patterns",
+      "React API Caching Strategy", "Progressive Web Apps (PWA)",
+      "Formik", "SAST/DAST Security Scans", "Role-Based Access Control",
+      "Auth0 Migration", "Object-Oriented Concepts"
+    ],
+    "familiar": [
+      "ASP.NET", "SQL Server", "Stored Procedures", "Cursors", "Functions",
+      "IBM Bob", "Claude Code", "JSON", "XML", "Client Requirement Gathering"
+    ]
+  },
+  "skills": {
+    "languages_frameworks": [
+      "HTML5", "CSS3", "React JS (ES6+)", "JavaScript", "TypeScript",
+      "Next.js", "Express.js", "Redux", "Redux-Thunk", "Redux-Saga", "Context API"
+    ],
+    "architecture_patterns": [
+      "Frontend System Design Patterns", "Object-Oriented Concepts",
+      "Micro-Frontends", "Module Federation", "Component-Driven Design",
+      "React API Caching Strategy", "Progressive Web Apps (PWA)",
+      "SSR", "SSG", "ISR", "SEO", "Core Web Vitals"
+    ],
+    "api_integration": [
+      "RESTful API", "GraphQL", "Axios", "React Query (TanStack Query)", "JSON", "XML"
+    ],
+    "backend_data": [
+      "ASP.NET", "SQL Server", "Stored Procedures", "Cursors", "Functions"
+    ],
+    "cloud_devops": [
+      "AWS Amplify", "AWS Cognito", "CI/CD Pipelines", "SAST/DAST Security Scans"
+    ],
+    "auth_security": [
+      "OIDC", "OAuth", "Auth0 Migration", "Role-Based Access Control"
+    ],
+    "ui_tooling": [
+      "Carbon Design System", "Tailwind", "Material UI", "Ant Design (Antd)",
+      "Formik", "Storybook", "Cypress", "Jest", "Webpack", "ESLint", "Git"
+    ],
+    "ai_tools": ["IBM Bob", "Claude Code"],
+    "practices": [
+      "Agile Development", "Code Review", "Mentorship", "Client Requirement Gathering"
+    ]
+  },
+  "experience": [
+    {
+      "title": "Software Developer – DataPower UI",
+      "company": "IBM India Software Lab",
+      "location": "Bengaluru, India",
+      "start": "2023-06",
+      "end": null,
+      "current": true,
+      "highlights": [
+        "Implemented a scalable, high-performing modern UI for IBM DataPower: a Single Page Application (SPA) and REST API architecture with 50–80 views, leveraging TypeScript, React, Express.js, and the Carbon Design System.",
+        "Collaborated with backend, design, and QA teams to deliver UI/UX solutions resulting in a 4x improvement in page rendering performance compared to the legacy UI.",
+        "Led the support initiative — triaging and debugging customer issues within the squad, reducing response times from several days to hours.",
+        "Secured user authentication by integrating OIDC login and role-based access control; fully migrated AAA User Onboarding to React, eliminating security vulnerabilities and dependency on the legacy stack.",
+        "Served as security focal point for DataPower UIs — addressed issues identified through SAST, DAST, and Mend security scans by analysing vulnerabilities and implementing fixes.",
+        "Wrote 100+ automated Cypress tests for front-end components to ensure code quality, reduce defects, and support continuous integration."
+      ]
+    },
+    {
+      "title": "Senior Engineering Management Specialist",
+      "company": "Hashedin by Deloitte",
+      "location": "Bengaluru, India",
+      "start": "2019-09",
+      "end": "2023-06",
+      "current": false,
+      "highlights": [
+        "Led front-end engineering teams of 5–10 across concurrent React/TypeScript client engagements, delivering production releases via AWS Amplify CI/CD pipelines while mentoring 3–4 interns/engineers and leading React training tracks.",
+        "Raised code quality and cut defect rates by 80% across projects via ESLint-driven PR review standards, Jest-based unit testing, and reusable component-driven React libraries adopted by 3–4 teams.",
+        "Clear Carbon (US client): Architected the service layer and ESLint standards from scratch for a carbon-credit trading platform, using Webpack for build configuration and Axios for RESTful API integration, with Jest-based test coverage from day one.",
+        "Profitability Analytics Tool (Tech Architect): Built a React, AWS, and Redux Toolkit application from the ground up, integrating GraphQL and React Query (TanStack Query) for efficient data fetching and caching, turning large-scale datamarts into actionable visualizations for business stakeholders.",
+        "Tangra (ICP): Delivered a multi-cloud (AWS, GCP, Azure) landing-zone platform via AWS Amplify CI/CD pipeline, Micro-Frontends architecture, and SAST/DAST security onboarding on Deloitte platform.",
+        "Sorted Services, Mfine & LOLC: Shipped Referral Landlord Portal (React, Redux-Saga, Context API, Formik) with positive Phase-I client feedback; integrated healthcare platform into Flipkart and Google Pay mini-app ecosystems; delivered permissions-based Auth0-to-AWS OAuth migration POC in one month."
+      ]
+    },
+    {
+      "title": "Senior Software Engineer (Fullstack Developer)",
+      "company": "Grasko Solution",
+      "location": "Bengaluru, India",
+      "start": "2015-11",
+      "end": "2019-09",
+      "current": false,
+      "highlights": [
+        "Built Kantime Home Health Care platform (ASP.NET, AngularJS, C#) serving 30–50 users/agencies.",
+        "Designed SQL Server schemas, stored procedures, and maintenance plans; reduced billing processing time by 50%.",
+        "Promoted to Senior Software Engineer (Jan 2019)."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Engineering, Computer Science Engineering",
+      "institution": "Institute of Technology and Management (ITM)",
+      "location": "Gwalior, Madhya Pradesh, India",
+      "start": "2011-07",
+      "end": "2015-06",
+      "cgpa": 7.83
+    }
+  ],
+  "honors": [
+    "Promoted to Senior Software Engineer, Hashedin by Deloitte (Jan 2021)",
+    "Recognized as 'Hasher of the Month', Hashedin by Deloitte (Nov 2020)",
+    "Promoted to Senior Software Engineer, Grasko Solution (Jan 2019)"
+  ],
+  "job_search_constraints": {
+    "_note": "Edit search_constraints.json for job-search preferences. Fields here are UNKNOWN until you fill that file.",
+    "target_roles": "UNKNOWN — see config/search_constraints.json",
+    "expected_salary": "UNKNOWN — see config/search_constraints.json",
+    "notice_period": "UNKNOWN — see config/search_constraints.json",
+    "preferred_work_mode": "UNKNOWN — see config/search_constraints.json",
+    "preferred_locations": "UNKNOWN — see config/search_constraints.json"
+  }
+}
