@@ -2,7 +2,7 @@
 
 > RAG + LLaMA 3 powered job match analyzer. Deployed on Vercel, LLM by Groq (free).
 
-**Live demo:** _your-project.vercel.app_ (after deploy)
+**Live demo:** [job-match-analyzer-ten.vercel](https://job-match-analyzer-ten.vercel.app/) (after deploy)
 
 ## Setup
 
